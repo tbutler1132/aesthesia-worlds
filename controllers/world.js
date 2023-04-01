@@ -9,7 +9,7 @@ export const client = createClient({
   })
 
 export const getWorlds = async (req, res) => {
-    const query = '*[_type == "world"]{_id, title, "cover_art": *[_type == "artwork" && primary == true]{file{asset ->{url}}}}'
+    const query = '*[_type == "world"]{_id, title, "cover_art": *[_type == "artwork" && primary == true && references(^._id)]{file{asset ->{url}}}}'
     try {
         const worlds = await client.fetch(query)
         return res.status(200).json(worlds)
@@ -22,7 +22,7 @@ export const getWorlds = async (req, res) => {
 export const getWorld = async (req, res) => {
     const { id } = req.params
     try {
-        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{_id, title, "cover_art": *[_type == "artwork" && primary == true]{file{asset ->{url}}}, cores[] ->{version, file{asset ->{url}}}}`)
+        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{_id, title, "cover_art": *[_type == "artwork" && primary == true && references(^._id)]{file{asset ->{url}}}, cores[] ->{version, _createdAt, file{asset ->{url}}}}`)
         return res.status(200).json(world[0])
     } catch (error) {
         console.log(error)
@@ -44,7 +44,7 @@ export const getWorldCores = async (req, res) => {
 export const getWorldArtworks = async (req, res) => {
     const { id } = req.params
     try {
-        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{artworks[] ->{primary, title, file{asset ->{url}}}}`)
+        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{artworks[] ->{primary, title, _id, file{asset ->{url}}}}`)
         return res.status(200).json(world[0].artworks)
     } catch (error) {
         console.log(error)
@@ -55,7 +55,7 @@ export const getWorldArtworks = async (req, res) => {
 export const getWorldVideos = async (req, res) => {
     const { id } = req.params
     try {
-        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{videos[] ->{primary, title, file{asset ->{url}}}}`)
+        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{videos[] ->{primary, title, _id, file{asset ->{url}}}}`)
         return res.status(200).json(world[0].videos)
     } catch (error) {
         console.log(error)
