@@ -3,9 +3,8 @@ import {createClient} from '@sanity/client'
 export const client = createClient({
     projectId: '05d4xked',
     dataset: 'production',
-    useCdn: false, // set to `true` to fetch from edge cache
-    apiVersion: '2023-03-26', // use current date (YYYY-MM-DD) to target the latest API version
-    // token: process.env.SANITY_SECRET_TOKEN // Only if you want to update content with the client
+    useCdn: false,
+    apiVersion: '2023-03-26',
   })
 
 export const getWorlds = async (req, res) => {
@@ -60,5 +59,34 @@ export const getWorldVideos = async (req, res) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json("Failed to get world videos")
+    }
+}
+
+export const getWorldSubNavLinks = async (req, res) => {
+    const { id } = req.params
+    const navLinks = ['artworks', 'videos', 'cores']
+    const finalObj = {links: []}
+    let linkSubstring = 'title, '
+    const buildQuery = (navLinks) => {
+        navLinks.forEach(link => {
+            linkSubstring = linkSubstring + link + ', '
+        })
+
+        return `*[_type == "world" && _id == "${id}"]{${linkSubstring}}`
+    }
+    try {
+        const test = await client.fetch(buildQuery(navLinks))
+        console.log(test[0])
+        navLinks.forEach(el => {
+            if(test[0][el].length){
+                finalObj.push()
+            } else {
+                finalObj[el] = false
+            }
+        })
+        finalObj['title'] = test[0]['title']
+        return res.status(200).json(finalObj)
+    } catch (error) {
+        console.log(error)
     }
 }
