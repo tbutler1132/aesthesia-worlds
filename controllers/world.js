@@ -51,6 +51,17 @@ export const getWorldArtworks = async (req, res) => {
     }
 }
 
+export const getWorldBranches = async (req, res) => {
+    const { id } = req.params
+    try {
+        const world = await client.fetch(`*[_type == "world" && _id == "${id}"]{branches[] ->{title, _id, _createdAt, description, artwork ->{file{asset ->{url}}}, file{asset ->{url}}}}`)
+        return res.status(200).json(world[0].branches)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json("Failed to get world branches")
+    }
+}
+
 export const getWorldVideos = async (req, res) => {
     const { id } = req.params
     try {
